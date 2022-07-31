@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./index.css" />
+    <title>Калькулятор цены для палатки в ТФ</title>
+  </head>
+  <body>
+    <div id="root">
+      <div class="title">Рассчитать стоимость аренды палатки</div>
+      <div class="inputRow">
+        Количество дней: <input type="number" id="daysCount" />
+      </div>
+      <div class="inputRow">
+        C какого дня начать: <input type="number" id="startFrom" />
+      </div>
+      <div class="outputWrapper">Стоимость: <span id="output"></span></div>
+    </div>
+    <script type="text/javascript">
+      function getPriceForDay(forPeriod) {
+        if (forPeriod < 1) return 28
+        return Math.round(Math.pow(1.15, Math.ceil(forPeriod - 1)) * 28)
+      }
+
+      function getPriceByDays(daysCount, startStreak = 0) {
+        let price = 0
+        let leftDays = daysCount
+        if (startStreak % 7 !== 0) {
+          const daysForFillStartStreak = 7 - (startStreak % 7)
+          const dayPriceForFirstStreak = getPriceForDay(startStreak / 7)
+          console.log(daysForFillStartStreak, daysCount)
+          if (daysCount <= daysForFillStartStreak) {
+            return dayPriceForFirstStreak * daysCount
+          }
+
+          price += daysForFillStartStreak * dayPriceForFirstStreak
+          leftDays -= daysForFillStartStreak
+        }
+
+        const daysTail = leftDays % 7
+        price += daysTail * getPriceForDay((startStreak + daysCount) / 7)
+        leftDays -= daysTail
+
+        return leftDays * getPriceForDay((startStreak + leftDays) / 7) + price
+      }
+
+      const output = document.getElementById('output')
+      const inputs = document.querySelectorAll('input[type="number"]')
+
+      const daysCount = document.getElementById('daysCount')
+      const startFrom = document.getElementById('startFrom')
+
+      inputs.forEach((input) =>
+        input.addEventListener('input', () => {
+          const startFromVal = startFrom.value ? +startFrom.value : 0
+          output.innerText = getPriceByDays(
+            Number(daysCount.value),
+            startFromVal
+          )
+        })
+      )
+    </script>
+  </body>
+</html>
