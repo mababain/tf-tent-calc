@@ -21,29 +21,92 @@
     <script type="text/javascript">
       function getPriceForDay(forPeriod) {
         if (forPeriod < 1) return 28
-        return Math.round(Math.pow(1.15, Math.ceil(forPeriod - 1)) * 28)
+        let scopeForPeriod = forPeriod
+        if (forPeriod % 1 === 0) {
+          scopeForPeriod += 1
+        }
+        return Math.pow(1.15, Math.ceil(scopeForPeriod - 1)) * 28
       }
 
       function getPriceByDays(daysCount, startStreak = 0) {
-        let price = 0
+        console.log(`Начало расчета идет с ${startStreak} дня`)
+
+        let startDaysPrice = 0
         let leftDays = daysCount
+        const dayPriceForFirstStreak = getPriceForDay(startStreak / 7)
+
         if (startStreak % 7 !== 0) {
           const daysForFillStartStreak = 7 - (startStreak % 7)
-          const dayPriceForFirstStreak = getPriceForDay(startStreak / 7)
-          console.log(daysForFillStartStreak, daysCount)
           if (daysCount <= daysForFillStartStreak) {
-            return dayPriceForFirstStreak * daysCount
+            console.log(
+              `Цена: %c${dayPriceForFirstStreak * daysCount}`,
+              'color: green; font-weight: bold'
+            )
+            console.log('%c|==============|', 'color: red')
+            return Math.round(dayPriceForFirstStreak * daysCount)
           }
 
-          price += daysForFillStartStreak * dayPriceForFirstStreak
+          startDaysPrice += daysForFillStartStreak * dayPriceForFirstStreak
           leftDays -= daysForFillStartStreak
         }
 
-        const daysTail = leftDays % 7
-        price += daysTail * getPriceForDay((startStreak + daysCount) / 7)
-        leftDays -= daysTail
+        console.log(
+          `Добить начальный стрик до цифры, кратной 7. Стоиомость: %c${startDaysPrice}`,
+          'color: green; font-weight: bold'
+        )
 
-        return leftDays * getPriceForDay((startStreak + leftDays) / 7) + price
+        const daysTail = leftDays % 7
+        let daysTailPrice = 0
+        if (daysTail !== 0) {
+          daysTailPrice +=
+            daysTail * getPriceForDay((startStreak + daysCount) / 7)
+          leftDays -= daysTail
+        }
+
+        if ((startStreak + leftDays) / 7 <= 1) {
+          console.log(
+            `Стоимость 1 целой недели: %c${leftDays * 28}`,
+            'color: green; font-weight: bold'
+          )
+          console.log(
+            `Добить оставшиеся ${daysTail} дни. Стоимость: %c${daysTailPrice}`,
+            'color: green; font-weight: bold'
+          )
+          console.log('%c|==============|', 'color: red')
+          return Math.round(startDaysPrice + leftDays * 28 + daysTailPrice)
+        } else {
+          let scopePrice = 0
+          for (let i = leftDays / 7; i > 0; i--) {
+            console.log(
+              `Стоимость ${(startStreak + leftDays) / 7 - i} недели: %c${
+                Math.pow(1.15, Math.ceil(leftDays / 7 - i)) *
+                dayPriceForFirstStreak *
+                7
+              }`,
+              'color: green; font-weight: bold'
+            )
+            console.log(dayPriceForFirstStreak)
+            scopePrice +=
+              Math.pow(1.15, Math.ceil(leftDays / 7 - i)) *
+              dayPriceForFirstStreak *
+              7
+          }
+          console.log(
+            `Стоимость всех целых недель: %c${scopePrice}`,
+            'color: green; font-weight: bold'
+          )
+          const finalValue = startDaysPrice + scopePrice + daysTailPrice
+          console.log(
+            `Добить оставшиеся ${daysTail} дни. Стоимость: %c${daysTailPrice}`,
+            'color: green; font-weight: bold'
+          )
+          console.log(
+            `Финальные: расчеты: %c${startDaysPrice} + ${scopePrice} + ${daysTailPrice} = ${finalValue}`,
+            'color: green; font-weight: bold'
+          )
+          console.log('%c|==============|', 'color: red')
+          return Math.round(startDaysPrice + scopePrice + daysTailPrice)
+        }
       }
 
       const output = document.getElementById('output')
