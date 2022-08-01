@@ -64,47 +64,62 @@
         }
 
         if ((startStreak + leftDays) / 7 <= 1) {
+          const weekPrice = leftDays * 28
           console.log(
-            `Стоимость 1 целой недели: %c${leftDays * 28}`,
+            `Стоимость 1 целой недели: %c${weekPrice}`,
             'color: green; font-weight: bold'
           )
           console.log(
             `Добить оставшиеся ${daysTail} дни. Стоимость: %c${daysTailPrice}`,
             'color: green; font-weight: bold'
           )
+          const finalPrice = startDaysPrice + weekPrice + daysTailPrice
+          console.log(
+            `Финальные: расчеты: %c${startDaysPrice} + ${weekPrice} + ${daysTailPrice} = ${finalPrice}`,
+            'color: green; font-weight: bold'
+          )
           console.log('%c|==============|', 'color: red')
-          return Math.round(startDaysPrice + leftDays * 28 + daysTailPrice)
+          return Math.round(finalPrice)
         } else {
           let scopePrice = 0
           for (let i = leftDays / 7; i > 0; i--) {
-            console.log(
-              `Стоимость ${(startStreak + leftDays) / 7 - i} недели: %c${
-                Math.pow(1.15, Math.ceil(leftDays / 7 - i)) *
-                dayPriceForFirstStreak *
-                7
-              }`,
-              'color: green; font-weight: bold'
-            )
-            scopePrice +=
-              Math.pow(1.15, Math.ceil(leftDays / 7 - i)) *
+            let week = (startStreak + leftDays) / 7 - i
+            let scopePeriod = leftDays / 7 - i
+            if (startStreak % 7 !== 0) {
+              week += 1
+              scopePeriod += 1
+            }
+            const curWeekPrice =
+              Math.pow(1.15, Math.ceil(scopePeriod)) *
               dayPriceForFirstStreak *
               7
+            scopePrice += curWeekPrice
+
+            console.log(
+              `Стоимость ${
+                week % 1 === 0 ? week + 1 : Math.ceil(week)
+              } недели: %c${curWeekPrice}`,
+              'color: green; font-weight: bold'
+            )
           }
           console.log(
             `Стоимость всех целых недель: %c${scopePrice}`,
             'color: green; font-weight: bold'
           )
-          const finalValue = startDaysPrice + scopePrice + daysTailPrice
+
           console.log(
             `Добить оставшиеся ${daysTail} дни. Стоимость: %c${daysTailPrice}`,
             'color: green; font-weight: bold'
           )
+
+          const finalPrice = startDaysPrice + scopePrice + daysTailPrice
           console.log(
-            `Финальные: расчеты: %c${startDaysPrice} + ${scopePrice} + ${daysTailPrice} = ${finalValue}`,
+            `Финальные: расчеты: %c${startDaysPrice} + ${scopePrice} + ${daysTailPrice} = ${finalPrice}`,
             'color: green; font-weight: bold'
           )
+
           console.log('%c|==============|', 'color: red')
-          return Math.round(startDaysPrice + scopePrice + daysTailPrice)
+          return Math.round(finalPrice)
         }
       }
 
